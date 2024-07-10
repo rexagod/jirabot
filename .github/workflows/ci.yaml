@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  # pull_request: # Avoid running on pulls since actions use secrets.
+  schedule:
+    - cron: '0 0 * * *' # Run every day at midnight
+
+env:
+  GH_KEY: ${{ secrets.GH_KEY }}
+  JIRA_KEY: ${{ secrets.JIRA_KEY }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the codebase
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Run vet
+        run: go vet ./...
+      - name: Setup dependencies
+        run: ASSETS_DIR="./assets/" make setup-dependencies
+      - name: Check for lint issues
+        run: ASSETS_DIR="./assets/" make lint
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the codebase
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Run vet
+        run: go vet ./...
+      - name: Build the binary
+        run: make jirabot
+      - name: Run the binary
+        run: ./jirabot
+      - name: Send custom JSON data to Slack workflow
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload-file-path: "./webhook-payload.json"
+          payload-file-path-parsed: false
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

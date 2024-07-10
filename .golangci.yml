@@ -1,0 +1,19 @@
+linters:
+  enable:
+    - nlreturn
+  disable:
+    - exhaustruct
+    - goerr113
+    - depguard
+    - testpackage
+    - prealloc
+    - gci
+    - godox
+  presets:
+    - bugs
+    - comment
+    - error
+    - import
+    - performance
+    - test
+    - unused

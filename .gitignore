@@ -1,0 +1,6 @@
+# IDE paraphernalia
+.idea
+
+# Compiled artifacts
+jirabot
+webhook-payload.json
